@@ -27,7 +27,7 @@
 Description=Run temperature sensors
 
 [Service]
-ExecStart=/opt/Sensors/DS18B20-On-Arduino/SampleOnDemandSensors.py
+ExecStart=/opt/Sensors/DS18B20_on_Arduino/SampleOnDemandSensors.py
 
 [Install]
 WantedBy=multi-user.target

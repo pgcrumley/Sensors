@@ -105,6 +105,8 @@ BMP280_REG_CONFIG_VALUE = (BMP280_REG_CONFIG_T_SB_MS_250 | BMP280_REG_CONFIG_FIL
 BMP280_RESET_TIME_IN_SECONDS = 0.001    # not specified, this seems like enough
 BMP280_SETTLE_TIME_IN_SECONDS = 0.25 * 8 # normal update every 250 mS x 8 samples
 
+SENSOR_TYPE_NAME = 'BME280'
+
 
 class BMP280:
     
@@ -182,6 +184,12 @@ class BMP280:
         self.__uid = h.hexdigest()
 
         
+    def get_chip_type(self):
+        """
+        return the type of sensor as a string.
+        """
+        return SENSOR_TYPE_NAME
+            
     def get_chip_id(self):
         '''
         retrieve the chip_id byte from the device

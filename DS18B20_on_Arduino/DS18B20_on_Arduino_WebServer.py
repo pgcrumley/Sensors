@@ -116,7 +116,7 @@ class DS18B20_on_Arduino_HTTPServer_RequestHandler(BaseHTTPRequestHandler):
                     print('line:  "{}"'.format(split_line))
             
         # Write content as utf-8 data
-        self.wfile.write(bytes(json.dumps(result), "utf8"))
+        self.wfile.write(bytes(json.dumps(result, indent=1), "utf8"))
         return
     
  

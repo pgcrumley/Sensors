@@ -77,7 +77,7 @@ class DS18B20_HTTPServer_RequestHandler(BaseHTTPRequestHandler):
             sample['when'] = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
             result.append(sample)
         # Write content as utf-8 data
-        self.wfile.write(bytes(json.dumps(result), "utf8"))
+        self.wfile.write(bytes(json.dumps(result, indent=1), "utf8"))
         return
     
  

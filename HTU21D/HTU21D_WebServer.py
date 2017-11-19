@@ -34,10 +34,10 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import HTU21D
 
-DEFAULT_LISTEN_ADDRESS = '0.0.0.0'     # respond to request from any address
+DEFAULT_LISTEN_ADDRESS = '0.0.0.0'      # respond to request from any address
 #DEFAULT_LISTEN_ADDRESS = '127.0.0.1'   # responds to only requests from localhost
-DEFAULT_LISTEN_PORT = 10280                 # IP port 10280
-#DEFAULT_LISTEN_PORT = TBD                  # Pick some other port if you prefer
+DEFAULT_LISTEN_PORT = 2100              # IP port 2100
+#DEFAULT_LISTEN_PORT = TBD              # Pick some other port if you prefer
 DEFAULT_SERVER_ADDRESS = (DEFAULT_LISTEN_ADDRESS, DEFAULT_LISTEN_PORT)
 
 

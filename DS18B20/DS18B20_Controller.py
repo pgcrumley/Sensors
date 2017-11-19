@@ -32,6 +32,7 @@ import struct
 
 SENSOR_BASE_FILENAME = '/sys/bus/w1/devices/28-'
 SENSOR_BASE_FILENAME_GLOB = SENSOR_BASE_FILENAME + '*'
+SENSOR_TYPE_NAME = 'DS1820'
 
 class DS18B20_Controller:
     """
@@ -40,6 +41,12 @@ class DS18B20_Controller:
     """
     def __init__(self):
         pass
+    
+    def get_sensor_type(self):
+        """
+        return the type of sensor as a string.
+        """
+        return SENSOR_TYPE_NAME
     
     def get_ids(self):
         """

@@ -100,7 +100,7 @@ class sensor_reader_thread(threading.Thread):
             if len(split_line) == 3:
                 when = datetime.datetime.now().strftime(DATETIME_FORMAT)
                 result = '{} {} {}\n'.format(when, split_line[1].replace('.', ''), split_line[2])
-                write_queue.put(result)
+                self.write_queue.put(result)
             
             # get another line
             split_line = self.port.readline().decode('UTF-8').split()

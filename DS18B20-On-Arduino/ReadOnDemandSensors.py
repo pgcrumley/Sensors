@@ -27,28 +27,14 @@ SOFTWARE.
 
 Capture data from DS18B20 sensors which are attached to Arduinos accessed by serial ports
 
-It is assumed this code runs as root and by default will place the data it collects in 
-  /opt/sensors/DS18B20-via-Arduinos.log
-the file is created if it does not exist and is appended if it does exist.
-There are no provisions to prune or manage the file size.
+It is assumed this code runs as root and sends one capture to STDOUT
 
-By default the sensors are sampled about every 60 seconds.
-
-Data in the file is of the form:
+Data is in the form:
   YYYYMMDD_HHMMSS <ID> <degrees C>
 
 The program looks for serially attached Arduino devices on '/dev/ttyUSB*', and 
 '/dev/ttyACM*'.  The line rate is 115200 baud.  The Arduino code can be found in the
 same github which held this code.
-  
-The program takes the following command-line arguments:
-  --help               print a help message
-  -l, --log_filename   filename for the log file
-  -i, --interval       the sampling period in seconds
-  -d, --debug          turn on debugging
-  
-Note:  If this program finds no active USB serial ports to sample it will happily run, create/
-append to the log file and monitor nothing.
 """
 
 import argparse
@@ -63,15 +49,11 @@ import time
 
 DEBUG = 0
 
-DEFAULT_SAMPLE_INTERVAL_IN_SECONDS = 60
-DEFAULT_LOG_FILE_NAME = '/opt/Sensors/logs/DS18B20-On-Arduino.log'
-
 DATETIME_FORMAT = '%Y%m%d_%H%M%S'
 
 SERIAL_FILENAME_GLOBS = ('/dev/ttyUSB*', '/dev/ttyACM*')
 PORT_SPEED = 115200
 NL = '\n'.encode('UTF-8')  # used to ask Arudino to send sensor data
-
 
 class writer_thread (threading.Thread):
     '''
@@ -129,31 +111,6 @@ class sensor_reader_thread(threading.Thread):
 # main
 #
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Capture and log data from Arduino-attached sensors via serial ports.")
-    parser.add_argument("-d", "--debug", help="turn on debugging", action="store_true")
-    parser.add_argument("-l", "--log_filename", help="file to log data, create or append", default=DEFAULT_LOG_FILE_NAME)
-    parser.add_argument("-i", "--interval", help="how often to sample sensors in seconds", default=DEFAULT_SAMPLE_INTERVAL_IN_SECONDS)
-    args = parser.parse_args()
-
-    if (args.debug):
-        DEBUG = 1
-        print('turned on DEBUG from command line.', file=sys.stderr, flush=True)
-
-    log_filename = args.log_filename
-    sample_interval = int(args.interval)
-    
-    if DEBUG:
-        print('log_filename = {}'.format(log_filename), file=sys.stderr, flush=True)
-        print('sample_interval = {}'.format(sample_interval), file=sys.stderr, flush=True)
-
-    if sample_interval < 0:
-        sample_interval = 0
-        if DEBUG:
-            print('negative sample interval set to 0', file=sys.stderr, flush=True)
-    
-    ##
-    ## done parsing command line
-    ##
 
     serial_devices = []
     for g in SERIAL_FILENAME_GLOBS:
@@ -173,33 +130,19 @@ if __name__ == "__main__":
         if DEBUG:
             print('no ports found to monitor.  continuing...', file=sys.stderr, flush=True)
 
-    os.makedirs(os.path.dirname(log_filename), exist_ok=True)
-    with open(log_filename, 'a') as output:
-        # set up queue to handle output to single place between many reading threads
-        write_queue = queue.Queue(20)
-        writer = writer_thread(output, write_queue)
-        writer.start()
+    # set up queue to handle output to single place between many reading threads
+    write_queue = queue.Queue(20)
+    writer = writer_thread(sys.stdout, write_queue)
+    writer.start()
 
-        next_sample_time = time.time()
-        # each time through loop collect data from each port of sensors
-        while True:
-            threads = []
-            for port in ports:
-                srt = sensor_reader_thread(write_queue, port)
-                threads.append(srt)
-                srt.start()
-            # wait for everything to complete
-            for t in threads:
-                t.join()
-        
-            next_sample_time = next_sample_time + sample_interval
-            delay_time = next_sample_time - time.time()
-            if DEBUG:
-                print('delay_time = {}'.format(delay_time), file=sys.stderr, flush=True)
-        
-            if 0 < delay_time:  # don't sleep if already past next sample time
-                time.sleep(delay_time)
-
-    # will probably never get here but if we do this will cause queue to drain and
+    threads = []
+    for port in ports:
+        srt = sensor_reader_thread(write_queue, port)
+        threads.append(srt)
+        srt.start()
+    # wait for everything to complete
+    for t in threads:
+        t.join()
+    
     # flush out any remaining data
     write_queue.join()

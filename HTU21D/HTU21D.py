@@ -76,12 +76,22 @@ class HTU21D:
     
         self.__chip_type = 'HTU21D'
 
+
     def get_chip_type(self):
         '''
         return the chip's firmware revision
         '''
         return self.__chip_type
         
+        
+    def get_uid(self):
+        '''
+        return the electronic ID from the chip.  (should be unique)
+        '''
+        return 'no_id'
+    
+    
+
     def retrieve_temp_humidity(self):
         '''
         Retrieve the raw data from the HTU21D and apply the various correction factors to

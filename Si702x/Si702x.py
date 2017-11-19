@@ -132,6 +132,13 @@ class Si702x:
         return self.__eid
     
     
+    def get_uid(self):
+        '''
+        same as get_chip_eid but different name for compatibilityZZ
+        '''
+        return self.__eid
+    
+    
     def retrieve_temp_humidity(self):
         '''
         Retrieve the raw data from the Si702x and apply the various correction factors to

@@ -42,10 +42,6 @@ import time
 
 import I2cAccess
 
-DEBUG = 0
-if DEBUG:
-    import sys
-    
 DEFAULT_RETRIES=5
 
 DEFAULT_DATA_BOARD_PIN = 11
@@ -134,7 +130,7 @@ class Si702x:
     
     def get_uid(self):
         '''
-        same as get_chip_eid but different name for compatibilityZZ
+        same as get_chip_eid but different name for compatibility
         '''
         return self.__eid
     
@@ -145,7 +141,7 @@ class Si702x:
         determine temperature and relative humidity
         Return the tuple <temperature in degrees C>, <relative humidity %>
         '''
-         # Read humidity -- wait...
+        # Read humidity -- wait...
         self.__i2c_dev.send_bytes_no_offset((Si702x_CMD_MEASURE_RH_NO_HOLD_MASTER_MODE,))
         time.sleep(Si702x_MAX_CONVERSION_TIME_IN_SEC)
         raw_bytes = self.__i2c_dev.receive_bytes_no_offset(3)
@@ -168,11 +164,11 @@ class Si702x:
         Retrieve the temperature and humidity.  This will retry the action
         "retries" times before giving up on errors.
         """
-        for t in range(retries):
+        for _ in range(retries):
             try:
                 temp,rh = self.retrieve_temp_humidity()
                 return temp,rh
-            except Exception as e:
+            except Exception as _:
                 # just toss problems for now and try again
                 pass
         

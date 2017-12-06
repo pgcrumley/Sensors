@@ -65,7 +65,6 @@ class BMP280_HTTPServer_RequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
         result=[]
-
         sample = {}
         sample['type'] = self.__device.get_chip_type()
         sample['id']=self.__device.get_uid()

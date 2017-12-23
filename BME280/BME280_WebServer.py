@@ -24,8 +24,8 @@ SOFTWARE.
 
 @author: pgcrumley@gmail.com
 
-Very simple web server to provide JSON representation of the BME280 devices.
-
+Very simple web server to provide JSON representation of the
+BME280 devices.
 """
 
 import datetime
@@ -34,16 +34,17 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import BME280
 
-DEFAULT_LISTEN_ADDRESS = '0.0.0.0'     # respond to request from any address
-#DEFAULT_LISTEN_ADDRESS = '127.0.0.1'   # responds to only requests from localhost
-DEFAULT_LISTEN_PORT = 10280                 # IP port 10280
-#DEFAULT_LISTEN_PORT = TBD                  # Pick some other port if you prefer
+DEFAULT_LISTEN_ADDRESS = '0.0.0.0'    # respond to request from any address
+#DEFAULT_LISTEN_ADDRESS = '127.0.0.1' # responds to only requests from localhost
+DEFAULT_LISTEN_PORT = 10280           # IP port 10280
+#DEFAULT_LISTEN_PORT = TBD            # Pick some other port if you prefer
 DEFAULT_SERVER_ADDRESS = (DEFAULT_LISTEN_ADDRESS, DEFAULT_LISTEN_PORT)
 
 
 class BME280_HTTPServer_RequestHandler(BaseHTTPRequestHandler):
     '''
-    A subclass of BaseHTTPRequestHandler to provide information about BME280 sensors.
+    A subclass of BaseHTTPRequestHandler to provide information about
+    BME280 sensors.
     '''
     
     # holds the device class, it will be created when needed
@@ -68,11 +69,13 @@ class BME280_HTTPServer_RequestHandler(BaseHTTPRequestHandler):
         sample = {}
         sample['type'] = self.__device.get_chip_type()
         sample['id']=self.__device.get_uid()
-        temperature,pressure,humidity = self.__device.retrieve_temperature_pressure_humidity()
+        temperature,pressure,humidity = \
+            self.__device.retrieve_temperature_pressure_humidity()
         sample['temp_C'] = temperature
         sample['rel_hum'] = humidity
         sample['pressure'] = pressure
-        sample['when'] = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        sample['when'] = \
+            datetime.datetime.now(datetime.timezone.utc).isoformat()
         result.append(sample)
         
         # Write content as utf-8 data
@@ -81,7 +84,8 @@ class BME280_HTTPServer_RequestHandler(BaseHTTPRequestHandler):
     
  
 def run():
-    httpd_server = HTTPServer(DEFAULT_SERVER_ADDRESS, BME280_HTTPServer_RequestHandler)
+    httpd_server = HTTPServer(DEFAULT_SERVER_ADDRESS,
+                              BME280_HTTPServer_RequestHandler)
     print('running server listening on {}...'.format(DEFAULT_SERVER_ADDRESS))
     httpd_server.serve_forever()
     

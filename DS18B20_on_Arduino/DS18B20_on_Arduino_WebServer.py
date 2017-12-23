@@ -24,8 +24,8 @@ SOFTWARE.
 
 @author: pgcrumley@gmail.com
 
-Very simple web server to provide JSON representation of the DS18B20 devices
-attached via Arduino devices.
+Very simple web server to provide JSON representation of the
+DS18B20 devices attached via Arduino devices.
   
 Datasheet at https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf
 
@@ -40,13 +40,11 @@ import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
-DEFAULT_LISTEN_ADDRESS = '0.0.0.0'     # respond to request from any address
-#DEFAULT_LISTEN_ADDRESS = '127.0.0.1'   # responds to only requests from localhost
-DEFAULT_LISTEN_PORT = 18820                 # IP port 18820
-#DEFAULT_LISTEN_PORT = TBD                  # Pick some other port if you prefer
+DEFAULT_LISTEN_ADDRESS = '0.0.0.0'    # respond to request from any address
+#DEFAULT_LISTEN_ADDRESS = '127.0.0.1' # responds to only requests from localhost
+DEFAULT_LISTEN_PORT = 18820           # IP port 18820
+#DEFAULT_LISTEN_PORT = TBD            # Pick some other port if you prefer
 DEFAULT_SERVER_ADDRESS = (DEFAULT_LISTEN_ADDRESS, DEFAULT_LISTEN_PORT)
-
-DATETIME_FORMAT = '%Y%m%d_%H%M%S'
 
 SERIAL_FILENAME_GLOBS = ('/dev/ttyUSB*', '/dev/ttyACM*')
 PORT_SPEED = 115200
@@ -57,7 +55,8 @@ DEBUG = 0
 
 class DS18B20_on_Arduino_HTTPServer_RequestHandler(BaseHTTPRequestHandler):
     '''
-    A subclass of BaseHTTPRequestHandler to provide information about DS18B20 sensors.
+    A subclass of BaseHTTPRequestHandler to provide information about
+    DS18B20 sensors.
     '''
     
     # holds the ports for the DS18B20 devices, will be created when first needed
@@ -73,13 +72,15 @@ class DS18B20_on_Arduino_HTTPServer_RequestHandler(BaseHTTPRequestHandler):
             for g in SERIAL_FILENAME_GLOBS:
                 serial_devices.extend(glob.glob(g))
             if DEBUG:
-                print('available devices include:  {}\n'.format(serial_devices), file=sys.stderr, flush=True)
+                print('available devices include:  {}\n'.format(serial_devices),
+                      file=sys.stderr, flush=True)
         
             self.__ports = []
             for s in serial_devices:
                 self.__ports.append(serial.Serial(s, PORT_SPEED))
             if DEBUG:
-                print('ports include:  {}\n'.format(self.__ports), file=sys.stderr, flush=True)
+                print('ports include:  {}\n'.format(self.__ports),
+                      file=sys.stderr, flush=True)
             time.sleep(3) # wait 3 seconds for Arduinos to reset
             
         # Send response status code
@@ -92,7 +93,8 @@ class DS18B20_on_Arduino_HTTPServer_RequestHandler(BaseHTTPRequestHandler):
         result=[]
         
         if DEBUG:
-            print('self.__ports is {}'.format(self.__ports), file=sys.stderr, flush=True)
+            print('self.__ports is {}'.format(self.__ports),
+                  file=sys.stderr, flush=True)
             
         for port in self.__ports:
             port.write(NL)  # ask for samples
@@ -108,7 +110,8 @@ class DS18B20_on_Arduino_HTTPServer_RequestHandler(BaseHTTPRequestHandler):
                     sample['type'] = 'DS18B20_on_Arduino'
                     sample['id']=split_line[1].replace('.','')
                     sample['temp_C'] = split_line[2]
-                    sample['when'] = datetime.datetime.now().strftime(DATETIME_FORMAT)
+                    sample['when'] = \
+                        datetime.datetime.now(datetime.timezone.utc).isoformat()
                     result.append(sample)
                 # get another line
                 split_line = port.readline().decode('UTF-8').split()
@@ -121,7 +124,8 @@ class DS18B20_on_Arduino_HTTPServer_RequestHandler(BaseHTTPRequestHandler):
     
  
 def run():
-    httpd_server = HTTPServer(DEFAULT_SERVER_ADDRESS, DS18B20_on_Arduino_HTTPServer_RequestHandler)
+    httpd_server = HTTPServer(DEFAULT_SERVER_ADDRESS,
+                              DS18B20_on_Arduino_HTTPServer_RequestHandler)
     print('running server listening on {}...'.format(DEFAULT_SERVER_ADDRESS))
     httpd_server.serve_forever()
     

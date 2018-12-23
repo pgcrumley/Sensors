@@ -1,7 +1,7 @@
 /*
  * MIT License
  * 
- * Copyright (c) 2017 Paul G Crumley
+ * Copyright (c) 2017, 2018 Paul G Crumley
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,9 @@
  * For each sensor found the temperature is sampled and if no errors are found
  * the sample is formatted and sent out the serial port at SERIAL_BAUD_RATE baud.
  * 
+ * If a '?' is received the it will return a line with the name of the
+ * sketch and a version with an extra new line.
+ *
  * The code allows more than one sensor to be attached to each pin.  The code simply
  * walks through all the sensors so if many devices are attached to an Arduino it can
  * take many seconds to retrieve all the samples.
@@ -158,11 +161,7 @@ int getSample(OneWire ds, byte addr[], byte data[]) {
 }  // getSample()
 
 
-void loop(void) {
-  /* wait till the controller tells us to take samples by sending a '\n' */
-  while ('\n' != Serial.read())
-    ;
-    
+void sampleSensors() {    
   /* loop through all the pins we are given to search */
   for (int i = 0; i < sizeof(PINS_TO_USE); i++) {
     int pin = PINS_TO_USE[i];
@@ -195,4 +194,15 @@ void loop(void) {
   }
   /* indicate all sensors have been sampled */
   Serial.write('\n');
+}
+
+
+void loop(void) {
+  /* wait till the controller tells us to take samples by sending a '\n' */
+  int ch = Serial.read();
+  if (ch == '\n') {
+    sampleSensors();
+  } else if (ch == '?') {
+    Serial.println("DS18B20_SampleOnDemand_V2\n");
+  }
 } // loop()

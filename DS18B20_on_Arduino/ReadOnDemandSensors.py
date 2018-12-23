@@ -37,10 +37,8 @@ The program looks for serially attached Arduino devices on '/dev/ttyUSB*', and
 same github which held this code.
 """
 
-import argparse
 import datetime
 import glob
-import os
 import queue
 import serial
 import sys

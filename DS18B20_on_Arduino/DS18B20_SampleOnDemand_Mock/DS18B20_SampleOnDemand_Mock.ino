@@ -1,7 +1,7 @@
 /*
  * MIT License
  * 
- * Copyright (c) 2017 Paul G Crumley
+ * Copyright (c) 2017, 2018 Paul G Crumley
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,9 @@
 
    This code waits for '\n' on the Serial port and when a "\n" is seen
    the code will send data out the serial port at SERIAL_BAUD_RATE baud.
+
+   If a '?' is received the it will return a line with the name of the
+   sketch and a version with an extra new line.
 
    Data is in the format of:
      "DS18B20 AA.AA.AA.AA.AA.AA.AA.AA   DD.DDDD\n"
@@ -77,17 +80,25 @@ void sendOutput(byte addr[], byte data[]) {
 /* Mock data */
 byte addr[] = {0x28, 0xff, 0x12, 0x34, 0x56, 0x78, 0x9a, 0xff};
 byte data[] = {0x50, 0x01, 0x4B, 0x46, 0x7F, 0xFF, 0x0C, 0x10, 0x07};
+
 /*
    Where the work is done
 */
-void loop(void) {
-  /* wait till the controller tells us to take samples by sending a '\n' */
-  while ('\n' != Serial.read())
-    ;
-
+void sampleSensors() {
   delay(DS18B20_CONVERSION_TIME_IN_MSEC+10);  // delay a bit as the real one would
   sendOutput(addr, data);
 
   /* indicate all sensors have been sampled */
   Serial.write('\n');
+}
+
+
+void loop(void) {
+    /* wait till the controller tells us to take samples by sending a '\n' */
+    int ch = Serial.read();
+    if (ch == '\n') {
+      sampleSensors();
+    } else if (ch == '?') {
+      Serial.println("DS18B20_SampleOnDemand_Mock_V2\n");
+    }
 } // loop()

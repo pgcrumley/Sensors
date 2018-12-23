@@ -25,9 +25,11 @@ SOFTWARE.
 @author: pgcrumley@gmail.com
 
 
-Capture data from DS18B20 sensors which are attached to Arduinos accessed by serial ports
+Capture data from DS18B20 sensors which are attached to Arduinos accessed by
+serial ports
 
-It is assumed this code runs as root and by default will place the data it collects in 
+It is assumed this code runs as root and by default will place the data it
+collects in 
   /opt/sensors/DS18B20-via-Arduinos.log
 the file is created if it does not exist and is appended if it does exist.
 There are no provisions to prune or manage the file size.
@@ -35,11 +37,11 @@ There are no provisions to prune or manage the file size.
 By default the sensors are sampled about every 60 seconds.
 
 Data in the file is of the form:
-  YYYYMMDD_HHMMSS <ID> <degrees C>
+  <Timestamp> <Device> <ID> <degrees C>
 
 The program looks for serially attached Arduino devices on '/dev/ttyUSB*', and 
-'/dev/ttyACM*'.  The line rate is 115200 baud.  The Arduino code can be found in the
-same github which held this code.
+'/dev/ttyACM*'.  The line rate is 115200 baud.  The Arduino code can be found
+in the same github which held this code.
   
 The program takes the following command-line arguments:
   --help               print a help message
@@ -47,8 +49,8 @@ The program takes the following command-line arguments:
   -i, --interval       the sampling period in seconds
   -d, --debug          turn on debugging
   
-Note:  If this program finds no active USB serial ports to sample it will happily run, create/
-append to the log file and monitor nothing.
+Note:  If this program finds no active USB serial ports to sample it will 
+happily run, create/append to the log file and monitor nothing.
 """
 
 import argparse
@@ -57,16 +59,16 @@ import glob
 import os
 import queue
 import serial
-import sys
 import threading
 import time
 
 DEBUG = 0
+if DEBUG:
+    import sys
 
-DEFAULT_SAMPLE_INTERVAL_IN_SECONDS = 60
+DEFAULT_SAMPLE_INTERVAL_IN_SECONDS = 60 * 10
+OUTPUT_FORMAT = '{} DS18B20 {} {}\n'
 DEFAULT_LOG_FILE_NAME = '/opt/Sensors/logs/DS18B20-On-Arduino.log'
-
-DATETIME_FORMAT = '%Y%m%d_%H%M%S'
 
 SERIAL_FILENAME_GLOBS = ('/dev/ttyUSB*', '/dev/ttyACM*')
 PORT_SPEED = 115200
@@ -116,8 +118,10 @@ class sensor_reader_thread(threading.Thread):
         # process till a blank line is returned
         while len(split_line) > 0:
             if len(split_line) == 3:
-                when = datetime.datetime.now().strftime(DATETIME_FORMAT)
-                result = '{} {} {}\n'.format(when, split_line[1].replace('.', ''), split_line[2])
+                when = datetime.datetime.now(datetime.timezone.utc).isoformat()
+                result = OUTPUT_FORMAT.format(when,
+                                              split_line[1].replace('.', ''),
+                                              split_line[2])
                 self.write_queue.put(result)
             
             # get another line
@@ -137,19 +141,23 @@ if __name__ == "__main__":
 
     if (args.debug):
         DEBUG = 1
-        print('turned on DEBUG from command line.', file=sys.stderr, flush=True)
+        print('turned on DEBUG from command line.',
+              file=sys.stderr, flush=True)
 
     log_filename = args.log_filename
     sample_interval = int(args.interval)
     
     if DEBUG:
-        print('log_filename = {}'.format(log_filename), file=sys.stderr, flush=True)
-        print('sample_interval = {}'.format(sample_interval), file=sys.stderr, flush=True)
+        print('log_filename = {}'.format(log_filename),
+              file=sys.stderr, flush=True)
+        print('sample_interval = {}'.format(sample_interval),
+              file=sys.stderr, flush=True)
 
     if sample_interval < 0:
         sample_interval = 0
         if DEBUG:
-            print('negative sample interval set to 0', file=sys.stderr, flush=True)
+            print('negative sample interval set to 0',
+                  file=sys.stderr, flush=True)
     
     ##
     ## done parsing command line
@@ -159,23 +167,27 @@ if __name__ == "__main__":
     for g in SERIAL_FILENAME_GLOBS:
         serial_devices.extend(glob.glob(g))
     if DEBUG:
-        print('available devices include:  {}\n'.format(serial_devices), file=sys.stderr, flush=True)
+        print('available devices include:  {}\n'.format(serial_devices),
+              file=sys.stderr, flush=True)
 
     ports = []
     for s in serial_devices:
         ports.append(serial.Serial(s, PORT_SPEED))
     if DEBUG:
-        print('ports include:  {}\n'.format(ports), file=sys.stderr, flush=True)
+        print('ports include:  {}\n'.format(ports),
+              file=sys.stderr, flush=True)
 
     if len(ports) > 0:
         time.sleep(3)  # give the Arduinos time to reset after serial open()
     else:
         if DEBUG:
-            print('no ports found to monitor.  continuing...', file=sys.stderr, flush=True)
+            print('no ports found to monitor.  continuing...',
+                  file=sys.stderr, flush=True)
 
     os.makedirs(os.path.dirname(log_filename), exist_ok=True)
     with open(log_filename, 'a') as output:
-        # set up queue to handle output to single place between many reading threads
+        # set up queue to handle output to single place between many
+        # reading threads
         write_queue = queue.Queue(20)
         writer = writer_thread(output, write_queue)
         writer.start()
@@ -195,11 +207,12 @@ if __name__ == "__main__":
             next_sample_time = next_sample_time + sample_interval
             delay_time = next_sample_time - time.time()
             if DEBUG:
-                print('delay_time = {}'.format(delay_time), file=sys.stderr, flush=True)
+                print('delay_time = {}'.format(delay_time),
+                      file=sys.stderr, flush=True)
         
             if 0 < delay_time:  # don't sleep if already past next sample time
                 time.sleep(delay_time)
 
-    # will probably never get here but if we do this will cause queue to drain and
-    # flush out any remaining data
+    # will probably never get here but if we do this will cause queue to
+    # drain and flush out any remaining data
     write_queue.join()

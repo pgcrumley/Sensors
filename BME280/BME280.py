@@ -131,7 +131,7 @@ class BME280:
             try: # the usual address is tried first
                 self.__smbus = smbus.SMBus(1)
                 self.__i2c_bus = 1
-            except Exception as ex: # not on 1 -- if not on 0 it is an error
+            except Exception as _: # not on 1 -- if not on 0 it is an error
                 self.__smbus = smbus.SMBus(0)
                 self.__i2c_bus = 0
  
@@ -247,7 +247,7 @@ class BME280:
         determine temperature, pressure and relative humidity
         Return the tuple <temperature in degrees C>, <pressure in hPa>, <relative humidity %>
         '''
-         # Read temperature/pressure/humidity
+        # Read temperature/pressure/humidity
         data = self.__smbus.read_i2c_block_data(self.__i2c_addr, BME280_REG_DATA_ADDR, BME280_REG_DATA_COUNT)
         pres_raw = (data[0] << 12) | (data[1] << 4) | (data[2] >> 4)
         temp_raw = (data[3] << 12) | (data[4] << 4) | (data[5] >> 4)
@@ -275,7 +275,7 @@ class BME280:
             var2 = pressure * self.__dig_P8 / 32768.0
             pressure = pressure + (var1 + var2 + self.__dig_P7) / 16.0
         
-         # Refine humidity
+        # Refine humidity
         humidity = t_fine - 76800.0
         humidity = (hum_raw - (self.__dig_H4 * 64.0 + self.__dig_H5 / 16384.0 * humidity)) * (self.__dig_H2 / 65536.0 * (1.0 + self.__dig_H6 / 67108864.0 * humidity * (1.0 + self.__dig_H3 / 67108864.0 * humidity)))
         humidity = humidity * (1.0 - self.__dig_H1 * humidity / 524288.0)

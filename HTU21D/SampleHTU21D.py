@@ -34,10 +34,10 @@ Capture data from a HTU21D device attached to a Raspberry Pi and
 periodically send the results to a file.
 
 send data in format of:
-  YYYYMMDD_HHMMSS <RPI_ID> <degrees C> <Rel Humidity>
+  <Timestamp> <Device> <RPI_ID> <degrees C> <Rel Humidity>
 """
 
-from datetime import datetime
+import datetime
 import time
 
 import HTU21D
@@ -46,8 +46,8 @@ DEBUG = 0
 if DEBUG:
     import sys
 
-SAMPLE_INTERVAL_IN_SECONDS = 60
-DATETIME_FORMAT = '%Y%m%d_%H%M%S'
+SAMPLE_INTERVAL_IN_SECONDS = 60 * 10
+OUTPUT_FORMAT = '{} {} {} {:.3f} {:.3f}\n'
 RESULT_FILENAME_BASE = '/opt/Sensors/logs/HTU21D_'
 
 #
@@ -70,24 +70,25 @@ if __name__ == '__main__':
     data_name = RESULT_FILENAME_BASE + RPI_ID
 
     sensor = HTU21D.HTU21D()
-    chip_type = sensor.get_chip_type()
     
     with open(data_name, 'a') as output:
         next_sample_time = time.time()
         while True:
-
-            when = datetime.now().strftime(DATETIME_FORMAT)
-            temp,rh = sensor.retrieve_temp_humidity()    
-            result = '{} {} {:.3f} {:.3f}\n'.format(when, RPI_ID, 
-                                                    temp, rh)
+            when = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            temperature,rh = sensor.retrieve_temp_humidity()
+            result = OUTPUT_FORMAT.format(when,
+                                          sensor.get_chip_type(), 
+                                          RPI_ID,
+                                          temperature,
+                                          rh)
             output.write(result)
             output.flush()
             
             next_sample_time = next_sample_time + SAMPLE_INTERVAL_IN_SECONDS
             delay_time = next_sample_time - time.time()
             if DEBUG:
-                print('delay_time = {}'.format(delay_time), file=sys.stderr, flush=True)
+                print('delay_time = {}'.format(delay_time),
+                      file=sys.stderr, flush=True)
         
             if 0 < delay_time:  # don't sleep if already next sample time
                 time.sleep(delay_time)
-

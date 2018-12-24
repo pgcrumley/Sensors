@@ -26,7 +26,7 @@ SOFTWARE.
 
 Capture data from DS18B20 sensors in /sys/bus/w1/devices and 
 send data to /opt/sensors/logs/DS18B20.log in format of:
-  YYYYMMDD_HHMMSS <ID> <degrees C>
+  <Timestamp> <Device> <ID> <degrees C>
   
 Datasheet at https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf
 
@@ -37,16 +37,38 @@ import time
 
 import DS18B20_Controller
 
-SAMPLE_INTERVAL_IN_SECONDS = 60
+DEBUG = 0
+if DEBUG:
+    import sys
 
-while True:
+SAMPLE_INTERVAL_IN_SECONDS = 60 * 10
+OUTPUT_FORMAT = '{} DS18B20 {} {:.3f}\n'
+RESULT_FILENAME = '/opt/Sensors/logs/DS18B20.log'
+
+#
+# main
+#
+if __name__ == '__main__':
+    
     controller = DS18B20_Controller.DS18B20_Controller()
-    with open('/opt/Sensors/logs/DS18B20.log', 'a') as output:
-        for i in controller.get_ids():
-            temp = controller.retrieve_temp(i)
-            result = '{} {} {:9.4f}'.format(
-                datetime.datetime.now().strftime('%Y%m%d_%H%M%S'),
-                i,
-                temp)
-            print(result, file=output, flush=True)
-        time.sleep(SAMPLE_INTERVAL_IN_SECONDS)
+
+    with open(RESULT_FILENAME, 'a') as output:
+        next_sample_time = time.time()
+        while True:
+            for device_id in controller.get_ids():
+                when = datetime.datetime.now(datetime.timezone.utc).isoformat()
+                temperature = controller.retrieve_temp(device_id)
+                result = OUTPUT_FORMAT.format(when,
+                                              device_id,
+                                              temperature)
+                output.write(result)
+                output.flush()
+                
+            next_sample_time = next_sample_time + SAMPLE_INTERVAL_IN_SECONDS
+            delay_time = next_sample_time - time.time()
+            if DEBUG:
+                print('delay_time = {}'.format(delay_time),
+                      file=sys.stderr, flush=True)
+        
+            if 0 < delay_time:  # don't sleep if already next sample time
+                time.sleep(delay_time)

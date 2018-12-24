@@ -121,7 +121,7 @@ class BMP280:
             try: # the usual address is tried first
                 self.__smbus = smbus.SMBus(1)
                 self.__i2c_bus = 1
-            except Exception as ex: # not on 1 -- if not on 0 it is an error
+            except Exception as _: # not on 1 -- if not on 0 it is an error
                 self.__smbus = smbus.SMBus(0)
                 self.__i2c_bus = 0
  
@@ -216,7 +216,6 @@ class BMP280:
         data = self.__smbus.read_i2c_block_data(self.__i2c_addr, BMP280_REG_DATA_ADDR, BMP280_REG_DATA_COUNT)
         pres_raw = (data[0] << 12) | (data[1] << 4) | (data[2] >> 4)
         temp_raw = (data[3] << 12) | (data[4] << 4) | (data[5] >> 4)
-        hum_raw = (data[6] << 8) | data[7]
         
         # Refine temperature
         var1 = ((((temp_raw >> 3) - (self.__dig_T1 << 1))) * (self.__dig_T2)) >> 11

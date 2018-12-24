@@ -35,10 +35,6 @@ import time
 
 import I2cAccess
 
-DEBUG = 0
-if DEBUG:
-    import sys
-
 DEFAULT_DATA_BOARD_PIN = 11
 DEFAULT_CLOCK_BOARD_PIN = 13  
 

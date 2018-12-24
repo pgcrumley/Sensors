@@ -28,11 +28,11 @@ Capture data from a Si702x device attached to a Raspberry Pi and
 periodically send the results to a file.
 
 send data in format of:
-  YYYYMMDD_HHMMSS <RPI_ID> <degrees C> <Rel Humidity>
+  <Timestamp> <Device> <RPI_ID> <degrees C> <Rel Humidity>
 
 """
 
-from datetime import datetime
+import datetime
 import time
 
 import Si702x
@@ -41,8 +41,8 @@ DEBUG = 0
 if DEBUG:
     import sys
 
-SAMPLE_INTERVAL_IN_SECONDS = 60
-DATETIME_FORMAT = '%Y%m%d_%H%M%S'
+SAMPLE_INTERVAL_IN_SECONDS = 60 * 10
+OUTPUT_FORMAT = '{} {} {} {:.3f} {:.3f}\n'
 RESULT_FILENAME_BASE = '/opt/Sensors/logs/'
 
 #
@@ -51,29 +51,32 @@ RESULT_FILENAME_BASE = '/opt/Sensors/logs/'
 if __name__ == '__main__':
     
     sensor = Si702x.Si702x()
-    if DEBUG:
-        print('sensor.get_chip_eid() = "{}"'.format(sensor.get_chip_eid()), file=sys.stderr)
-
     chip_type = sensor.get_chip_type()
     chip_eid = sensor.get_chip_eid()
+    if DEBUG:
+        print('sensor.get_chip_eid() = "{}":"{}"'.format(chip_type, chip_eid),
+              file=sys.stderr)
 
     data_name = RESULT_FILENAME_BASE + chip_type + '_' + chip_eid
     
-    next_sample_time = time.time()
-    while True:
-        with open(data_name, 'a') as output:
-            when = datetime.now().strftime(DATETIME_FORMAT)
-            temp,rh = sensor.retrieve_temp_humidity_with_retries()    
-            result = '{} {} {:.3f} {:.3f}\n'.format(when, chip_eid, 
-                                                    temp, rh)
+    with open(data_name, 'a') as output:
+        next_sample_time = time.time()
+        while True:
+            when = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            temperature,rh = sensor.retrieve_temp_humidity_with_retries()    
+            result = OUTPUT_FORMAT.format(when,
+                                          chip_type,
+                                          chip_eid, 
+                                          temperature,
+                                          rh)
             output.write(result)
             output.flush()
             
             next_sample_time = next_sample_time + SAMPLE_INTERVAL_IN_SECONDS
             delay_time = next_sample_time - time.time()
             if DEBUG:
-                print('delay_time = {}'.format(delay_time), file=sys.stderr, flush=True)
+                print('delay_time = {}'.format(delay_time),
+                      file=sys.stderr, flush=True)
         
             if 0 < delay_time:  # don't sleep if already next sample time
                 time.sleep(delay_time)
-

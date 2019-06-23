@@ -22,9 +22,14 @@
 #
 # @author: pgcrumley@gmail.com
 #
+# Note use of After and Wants to help ensure the network is running before
+# starting this service
+#
 
 [Unit]
 Description=Run web server for DS18B20 temperature sensor on W1 pin
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 ExecStart=/opt/Sensors/DS18B20/DS18B20_WebServer.py

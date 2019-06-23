@@ -22,9 +22,14 @@
 #
 # @author: pgcrumley@gmail.com
 #
+# Note use of After and Wants to help ensure the network is running before
+# starting this service
+#
 
 [Unit]
 Description=Run web server for BME280 temperature sensor on I2C bus
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 ExecStart=/opt/Sensors/BME280/BME280_WebServer.py

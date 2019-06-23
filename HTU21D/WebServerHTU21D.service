@@ -22,9 +22,14 @@
 #
 # @author: pgcrumley@gmail.com
 #
+# Note use of After and Wants to help ensure the network is running before
+# starting this service
+#
 
 [Unit]
 Description=Run web server for HTU21D temperature sensor on I2C bus
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 ExecStart=/opt/Sensors/HTU21D/HTU21D_WebServer.py

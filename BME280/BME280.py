@@ -2,7 +2,7 @@
 """
 MIT License
 
-Copyright (c) 2017 Paul G Crumley
+Copyright (c) 2017, 2019 Paul G Crumley
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@ SOFTWARE.
 @author: pgcrumley@gmail.com
 
 Capture data from BME280 attached to Raspberry Pi I2C bus.
+I2C pins: data / clock are board pins 3 / 5
 
 This puts the chip in a mode that is continuously taking samples and 
 smoothing the values to try to eliminate spurious data.  The sample rate

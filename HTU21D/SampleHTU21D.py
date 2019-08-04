@@ -2,7 +2,7 @@
 """
 MIT License
 
-Copyright (c) 2017 Paul G Crumley
+Copyright (c) 2017, 2019 Paul G Crumley
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +25,8 @@ SOFTWARE.
 @author: pgcrumley@gmail.com
 
 Capture data from HTU21D attached to Raspberry Pi GPIO pins.
-By default CLOCK is pin 5 and DATA is pin 3
+By default CLOCK is board pin 13 and DATA is board pin 11.
+The device should be powered at 3.3 volts.
 
 Datasheet available from :
 https://www.silabs.com/documents/public/data-sheets/Si7021-A20.pdf

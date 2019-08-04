@@ -26,7 +26,7 @@
 
 mkdir /opt/Sensors/logs
 
-cp /opt/Sensors/SampleBME280.service /lib/systemd/system
+cp /opt/Sensors/BME280/SampleBME280.service /lib/systemd/system
 
 systemctl enable SampleBME280
 systemctl start SampleBME280

@@ -26,7 +26,7 @@
 
 mkdir /opt/Sensors/logs
 
-cp /opt/Sensors/SampleHTU21D.service /lib/systemd/system
+cp /opt/Sensors/HTU21D/SampleHTU21D.service /lib/systemd/system
 
 systemctl enable SampleHTU21D
 systemctl start SampleHTU21D

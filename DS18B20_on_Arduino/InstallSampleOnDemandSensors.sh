@@ -26,7 +26,7 @@
 
 mkdir /opt/Sensors/logs
 
-cp /opt/Sensors/SampleOnDemandSensors.service /lib/systemd/system
+cp /opt/Sensors/DS18B20_on_Arduino/SampleOnDemandSensors.service /lib/systemd/system
 
 systemctl enable SampleOnDemandSensors
 systemctl start SampleOnDemandSensors

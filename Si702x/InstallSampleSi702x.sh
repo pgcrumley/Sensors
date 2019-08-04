@@ -26,7 +26,7 @@
 
 mkdir /opt/Sensors/logs
 
-cp /opt/Sensors/SampleSi702x.service /lib/systemd/system
+cp /opt/Sensors/Si702x/SampleSi702x.service /lib/systemd/system
 
 systemctl enable SampleSi702x
 systemctl start SampleSi702x

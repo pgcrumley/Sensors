@@ -26,7 +26,7 @@
 
 mkdir /opt/Sensors/logs
 
-cp /opt/Sensors/SampleDS18B20s.service /lib/systemd/system
+cp /opt/Sensors/DS18B20/SampleDS18B20s.service /lib/systemd/system
 
 systemctl enable SampleDS18B20s
 systemctl start SampleDS18B20s

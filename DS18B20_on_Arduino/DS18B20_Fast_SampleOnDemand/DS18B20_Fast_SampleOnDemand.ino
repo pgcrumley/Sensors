@@ -1,7 +1,7 @@
 /*
  * MIT License
  * 
- * Copyright (c) 2017, 2018 Paul G Crumley
+ * Copyright (c) 2017, 2021 Paul G Crumley
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,6 +45,9 @@
  *   DD.DDDD is degrees Celsius -- possibly negative
  *
  * Malformed data is silently discarded.
+ * 
+ * V2   '?' command provides version info
+ * V3   Respond to '\r' the same as '\n'
  */
 
 #include <OneWire.h>
@@ -234,10 +237,9 @@ void sampleSensors() {
 void loop(void) {
     /* wait till the controller tells us to take samples by sending a '\n' */
     int ch = Serial.read();
-    if (ch == '\n') {
+    if ((ch == '\n') || (ch == '\r')) {
       sampleSensors();
     } else if (ch == '?') {
-      Serial.println("DS18B20_Fast_SampleOnDemand_V2\n");
+      Serial.println("DS18B20_Fast_SampleOnDemand_V3\n");
     }
 } // loop()
-

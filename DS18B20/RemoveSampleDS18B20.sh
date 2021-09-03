@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 # MIT License
 #
-# Copyright (c) 2019 Paul G Crumley
+# Copyright (c) 2019, 2021 Paul G Crumley
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,12 @@
 #
 # @author: pgcrumley@gmail.com
 #
+
+# make sure running as root
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root" 
+   exit 1
+fi
 
 systemctl stop SampleDS18B20s
 systemctl disable SampleDS18B20s

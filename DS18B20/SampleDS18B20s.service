@@ -27,6 +27,9 @@
 Description=Sample DS18B20 temperature sensors connected to a Raspberry Pi
 
 [Service]
+Type=simple
+Restart=always
+RestartSec=5
 ExecStart=/opt/Sensors/DS18B20/SampleDS18B20s.py
 
 [Install]

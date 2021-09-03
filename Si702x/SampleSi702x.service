@@ -27,6 +27,9 @@
 Description=Run Si702x temperature sensor on I2C bus
 
 [Service]
+Type=simple
+Restart=always
+RestartSec=5
 ExecStart=/opt/Sensors/Si702x/SampleSi702x.py
 
 [Install]

@@ -27,6 +27,9 @@
 Description=Run temperature sensors
 
 [Service]
+Type=simple
+Restart=always
+RestartSec=5
 ExecStart=/opt/Sensors/DS18B20_on_Arduino/SampleOnDemandSensors.py
 
 [Install]

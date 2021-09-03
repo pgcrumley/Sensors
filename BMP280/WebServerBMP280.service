@@ -32,6 +32,9 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
+Type=simple
+Restart=always
+RestartSec=5
 ExecStart=/opt/Sensors/BMP280/BMP280_WebServer.py
 
 [Install]

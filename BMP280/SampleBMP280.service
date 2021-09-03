@@ -27,6 +27,9 @@
 Description=Run BMP280 temperature sensor on I2C bus
 
 [Service]
+Type=simple
+Restart=always
+RestartSec=5
 ExecStart=/opt/Sensors/BMP280/SampleBMP280.py
 
 [Install]

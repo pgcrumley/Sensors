@@ -25,18 +25,23 @@
  */
 
 /*
- * This code waits for '\n' on the Serial port and when a '\n' is seen
+ * As of V4, the code will move to a new set of commands if a '`' character is seen.
+ * Until '`' is received, '\r' and '\n' initiate a sample, and '?' returns the version.
+ * Once a '`' is received, '?' initiates samples and '`' returns the version.
+ * The version is returned in response to the first '`' received.
+ * All other commands are ignored.
+ * 
+ * This code waits for '?' on the Serial port and when a '?' is seen
  * the code will cycle through pins specified in PINS_TO_USE.   
  * For each sensor found the temperature is sampled and if no errors are found
  * the sample is formatted and sent out the serial port at SERIAL_BAUD_RATE baud.
+ *
+ * If a '`' is received, return a line with the name of the sketch and a version
+ *
+ * This "Fast" version of the Arduino code will initiate the sample operation on
+ * all the devices in parallel to reduce the overall time but the trade-off is
+ * there may be only a single sensor on each Arduino pin.
  * 
- * If a '?' is received the it will return a line with the name of the
- * sketch and a version with an extra new line.
- *
- * The code allows more than one sensor to be attached to each pin.  The code simply
- * walks through all the sensors so if many devices are attached to an Arduino it can
- * take many seconds to retrieve all the samples.
- *
  * Data is in the format of:
  *   "DS18B20 AA.AA.AA.AA.AA.AA.AA.AA   DD.DDDD\n"
  * where:
@@ -45,18 +50,22 @@
  *   DD.DDDD is degrees Celsius -- possibly negative
  *
  * Malformed data is silently discarded.
- *
- * Malformed data is silently discarded.
  * 
  * V2   '?' command provides version info
  * V3   Respond to '\r' the same as '\n'
+ * V4   NOTE:  Commands are changed!
+ *      '`' for version, '?' for samples, '\r' and '\n' are ignored with other commands
  */
 
 #include <OneWire.h>
 
+// DS18S20 Temperature chip i/o
+
+int use_new_commands = 0;  /* start using execution using the old commands */
+
 #define DEBUG 0
+
 #define SERIAL_BAUD_RATE 115200
-#define SAMPLE_DELAY_IN_MSEC 30000
 
 #define DS18B20_BYTES_IN_ADDRESS 8
 #define DS18B20_BYTES_IN_DATA 8
@@ -95,9 +104,8 @@ void sendOutput(byte addr[], byte data[]) {
 
 /*  
  *   return 0 if success, < 0 if problem.
- *   Assume data is always overwritten.
  */
-int getSample(OneWire ds, byte addr[], byte data[]) {
+int startSample(OneWire ds, byte addr[]) {
   byte present = 0;
 
   present = ds.reset();
@@ -110,8 +118,15 @@ int getSample(OneWire ds, byte addr[], byte data[]) {
   ds.select(addr);
   ds.write(0x44,1);         // start conversion, with parasite power on at the end
 
-  delay(DS18B20_CONVERSION_TIME_IN_MSEC);
-  // we could do a ds.depower() here, but the reset will take care of it.
+  return 0;  // success
+}  // getSample()
+
+/*  
+ *   return 0 if success, < 0 if problem.
+ *   Assume data is always overwritten.
+ */
+int getSample(OneWire ds, byte addr[], byte data[]) {
+  byte present = 0;
 
   present = ds.reset();
   if (0 == present) {
@@ -166,7 +181,33 @@ int getSample(OneWire ds, byte addr[], byte data[]) {
 }  // getSample()
 
 
-void sampleSensors() {    
+void sampleSensors() {
+  /* loop through all the pins we are given to search */
+  for (int i = 0; i < sizeof(PINS_TO_USE); i++) {
+    int pin = PINS_TO_USE[i];
+    if (DEBUG) {
+      Serial.println(pin);
+    }
+    OneWire ds(pin);
+
+    /* find all one-wire devices and 
+       if a DS18B20 try to read the temperature */
+    byte addr[DS18B20_BYTES_IN_ADDRESS];
+    ds.reset_search();
+    while ( ds.search(addr)) {
+      if (DS18B20_ID_CONSTANT == addr[0]) { // only try to read DS18B20 devices
+        int rc = 1;
+        /* normally leave this loop via break */
+        for (int retry = 0; retry < 5; retry++) {
+          byte data[DS18B20_BYTES_IN_DATA_PLUS_CRC];
+          rc = startSample(ds, addr);
+        } // for retry
+      } // if (DS18B20_ID_CONSTANT == ...
+    }
+  }
+    
+  delay(DS18B20_CONVERSION_TIME_IN_MSEC);
+
   /* loop through all the pins we are given to search */
   for (int i = 0; i < sizeof(PINS_TO_USE); i++) {
     int pin = PINS_TO_USE[i];
@@ -193,6 +234,7 @@ void sampleSensors() {
         } // for retry
       } // if (DS18B20_ID_CONSTANT == ...
     }
+    
     if (DEBUG) {
       Serial.println("done with loop().  waiting....");
     }
@@ -203,11 +245,31 @@ void sampleSensors() {
 
 
 void loop(void) {
-  /* wait till the controller tells us to take samples by sending a '\n' */
-  int ch = Serial.read();
-  if ((ch == '\n') || (ch == '\r')) {
-    sampleSensors();
-  } else if (ch == '?') {
-    Serial.println("DS18B20_SampleOnDemand_V3\n");
-  }
+    /* wait till the controller tells us to take samples by sending a '\n' */
+    int ch = Serial.read();
+    if (ch > 0) {
+      if (DEBUG) {
+        Serial.print("Command: 0x");
+        Serial.print(ch, HEX); 
+        Serial.print('\n');
+      }
+    }
+    if ('`' == ch) {  /* switch to new command set once a '`' is received */
+      use_new_commands = 1;
+    }
+    
+    if (use_new_commands) {
+      if ('?' == ch) {
+        sampleSensors();
+      } else if ('`' == ch) {
+        Serial.println("V4_DS18B20_Fast_SampleOnDemand");
+      }
+    } else {
+      /* use old commands */
+      if ((ch == '\n') || (ch == '\r')) {
+        sampleSensors();
+      } else if (ch == '?') {
+        Serial.println("DS18B20_SampleOnDemand_V4\n");
+      }
+    }
 } // loop()

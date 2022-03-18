@@ -1,7 +1,7 @@
 #!/bin/bash
 # MIT License
 #
-# Copyright (c) 2019, 2021 Paul G Crumley
+# Copyright (c) 2019, 2022 Paul G Crumley
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -30,9 +30,8 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-mkdir /opt/Sensors/logs
+systemctl stop DS18B20_via_Arduino_WebServer
+systemctl disable DS18B20_via_Arduino_WebServer
 
-cp /opt/Sensors/DS18B20_on_Arduino/SampleOnDemandSensors.service /lib/systemd/system
+rm /lib/systemd/system/DS18B20_via_Arduino_WebServer.service
 
-systemctl enable SampleOnDemandSensors
-systemctl start SampleOnDemandSensors

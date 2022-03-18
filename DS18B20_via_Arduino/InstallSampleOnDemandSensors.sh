@@ -1,6 +1,7 @@
+#!/bin/bash
 # MIT License
 #
-# Copyright (c) 2017, 2021 Paul G Crumley
+# Copyright (c) 2019, 2022 Paul G Crumley
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,23 +24,17 @@
 # @author: pgcrumley@gmail.com
 #
 
-[Unit]
-Description=Run temperature sensors
+# make sure running as root
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root" 
+   exit 1
+fi
 
-[Service]
-Type=simple
-Restart=always
-RestartSec=5
-ExecStart=/opt/Sensors/DS18B20_on_Arduino/SampleOnDemandSensors.py
+pip3 install -r requirements.txt
 
-[Install]
-WantedBy=multi-user.target
+mkdir /opt/Sensors/logs
 
-#
-# this is installed in /lib/systemd/system
-# then run 
-#    'sudo systemctl enable SampleOnDemandSensors'
-# this makes the service start at boot time
-# then run 
-#    'sudo systemctl start SampleOnDemandSensors'
-# this starts the service now
+cp /opt/Sensors/DS18B20_via_Arduino/SampleOnDemandSensors.service /lib/systemd/system
+
+systemctl enable SampleOnDemandSensors
+systemctl start SampleOnDemandSensors

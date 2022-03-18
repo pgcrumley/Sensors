@@ -1,18 +1,18 @@
 /*
  * MIT License
- * 
- * Copyright (c) 2017 Paul G Crumley
- * 
+ *
+ * Copyright (c) 2017, 2022 Paul G Crumley
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,16 +20,16 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- * 
+ *
  * @author: pgcrumley@gmail.com
  */
 
 /*
  * This code will cycle through pins specified in PINS_TO_USE every
- * SAMPLE_DELAY_IN_MSEC milliseconds.  For each sensor found the 
- * temperature is sampled and if no errors are found the sample is 
- * formatted and sent out the serial port at SERIAL_BAUD_RATE baud.  
- * 
+ * SAMPLE_DELAY_IN_MSEC milliseconds.  For each sensor found the
+ * temperature is sampled and if no errors are found the sample is
+ * formatted and sent out the serial port at SERIAL_BAUD_RATE baud.
+ *
  * Data is in the format of:
  *   "DS18B20 AA.AA.AA.AA.AA.AA.AA.AA   DD.DDDD\n"
  * where:
@@ -37,9 +37,9 @@
  *   AA....AA is the device ID
  *   DD.DDDD is degrees Celsius -- possibly negative
  *
- * Note: The SAMPLE_DELAY_IN_MSEC is not the overall interval 
+ * Note: The SAMPLE_DELAY_IN_MSEC is not the overall interval
  * between temperature samples for an individual sensor as it
- * takes almost 1 second to read each sensor, so the overall 
+ * takes almost 1 second to read each sensor, so the overall
  * interval will vary with the number of sensors.
  */
 
@@ -47,9 +47,9 @@
   *  Launch all sensor conversions in parallel then read sensors in
   *  parallel to keep interval more constant across the number of
   *  sensors.
-  *  
-  *  Set a target time for next interval then only delay the time 
-  *  needed rather than delay a fixed time.  
+  *
+  *  Set a target time for next interval then only delay the time
+  *  needed rather than delay a fixed time.
   */
 #include <OneWire.h>
 
@@ -57,7 +57,7 @@
 
 #define DEBUG 0
 #define SERIAL_BAUD_RATE 115200
-#define SAMPLE_DELAY_IN_MSEC 60000
+#define SAMPLE_DELAY_IN_MSEC (10 * 1000)
 
 #define DS18B20_BYTES_IN_ADDRESS 8
 #define DS18B20_BYTES_IN_DATA 8
@@ -75,9 +75,9 @@ void setup(void) {
   Serial.begin(SERIAL_BAUD_RATE);
 }
 
-/* 
-   Format the address & temperture then 
-   send the output for a sensor out the serial port 
+/*
+   Format the address & temperture then
+   send the output for a sensor out the serial port
 */
 void sendOutput(byte addr[], byte data[]) {
 
@@ -88,13 +88,13 @@ void sendOutput(byte addr[], byte data[]) {
   dtostrf(temp, 9, 4, temp_str);
 
   char output_str[] = "DS18B20 xx.xx.xx.xx.xx.xx.xx.xx -999.99\n\0\0\0\0";
-  sprintf(output_str, "DS18B20 %02x.%02x.%02x.%02x.%02x.%02x.%02x.%02x %s\n", 
-          addr[0], addr[1], addr[2], addr[3], addr[4], addr[5], addr[6], addr[7], 
+  sprintf(output_str, "DS18B20 %02x.%02x.%02x.%02x.%02x.%02x.%02x.%02x %s\n",
+          addr[0], addr[1], addr[2], addr[3], addr[4], addr[5], addr[6], addr[7],
           temp_str);
   Serial.print(output_str);
 } // sendOutput
 
-/*  
+/*
  *   return 0 if success, < 0 if problem.
  *   Assume data is always overwritten.
  */
@@ -121,7 +121,7 @@ int getSample(OneWire ds, byte addr[], byte data[]) {
     }
     return -2;
   }
-  ds.select(addr);    
+  ds.select(addr);
   ds.write(0xBE);         // Read Scratchpad
 
   for (int i = 0; i < DS18B20_BYTES_IN_DATA_PLUS_CRC; i++) {
@@ -162,7 +162,7 @@ int getSample(OneWire ds, byte addr[], byte data[]) {
     Serial.print( crc, HEX);
     Serial.print("\n");
   }
-  
+
   return 0;  // success
 }  // getSample()
 
@@ -177,7 +177,7 @@ void loop(void) {
     }
     OneWire ds(pin);
 
-    /* find all one-wire devices and 
+    /* find all one-wire devices and
        if a DS18B20 try to read the temperature */
     byte addr[DS18B20_BYTES_IN_ADDRESS];
     ds.reset_search();

@@ -32,7 +32,7 @@ fi
 
 pip3 install -r requirements.txt
 
-mkdir /opt/Sensors/logs
+mkdir -p /opt/Sensors/logs
 
 cp /opt/Sensors/DS18B20_via_Arduino/SampleOnDemandSensors.service /lib/systemd/system
 

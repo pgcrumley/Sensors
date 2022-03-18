@@ -32,8 +32,6 @@ fi
 
 pip3 install -r requirements.txt
 
-mkdir /opt/Sensors/logs
-
 cp /opt/Sensors/DS18B20_via_Arduino/DS18B20_via_Arduino_WebServer.service /lib/systemd/system
 
 systemctl enable DS18B20_via_Arduino_WebServer

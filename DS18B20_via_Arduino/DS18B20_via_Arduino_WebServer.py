@@ -107,7 +107,7 @@ def find_DS18B20_devices():
 
 
 
-class DS18B20_on_Arduino_HTTPServer_RequestHandler(BaseHTTPRequestHandler):
+class DS18B20_via_Arduino_HTTPServer_RequestHandler(BaseHTTPRequestHandler):
     '''
     A subclass of BaseHTTPRequestHandler to provide information about DS18B20 sensors.
     '''
@@ -120,17 +120,17 @@ class DS18B20_on_Arduino_HTTPServer_RequestHandler(BaseHTTPRequestHandler):
         handle the HTTP GET request
         '''
         if DEBUG:
-            print(f'{DS18B20_on_Arduino_HTTPServer_RequestHandler.__controllers}',
+            print(f'{DS18B20_via_Arduino_HTTPServer_RequestHandler.__controllers}',
                   file=sys.stderr, flush=True)
         
         # first time through get create the ports list
-        if None == DS18B20_on_Arduino_HTTPServer_RequestHandler.__controllers:
-            DS18B20_on_Arduino_HTTPServer_RequestHandler.__controllers = find_DS18B20_devices()
+        if None == DS18B20_via_Arduino_HTTPServer_RequestHandler.__controllers:
+            DS18B20_via_Arduino_HTTPServer_RequestHandler.__controllers = find_DS18B20_devices()
             if DEBUG:
-                for c in DS18B20_on_Arduino_HTTPServer_RequestHandler.__controllers.keys():
-                    print(f'    {c} : {DS18B20_on_Arduino_HTTPServer_RequestHandler.__controllers[c].get_type()} : {DS18B20_on_Arduino_HTTPServer_RequestHandler.__controllers[c].get_arduino_program_version()}',
+                for c in DS18B20_via_Arduino_HTTPServer_RequestHandler.__controllers.keys():
+                    print(f'    {c} : {DS18B20_via_Arduino_HTTPServer_RequestHandler.__controllers[c].get_type()} : {DS18B20_via_Arduino_HTTPServer_RequestHandler.__controllers[c].get_arduino_program_version()}',
                           file=sys.stderr, flush=True)
-                    print(DS18B20_on_Arduino_HTTPServer_RequestHandler.__controllers[c].retrieve_temperatures(),
+                    print(DS18B20_via_Arduino_HTTPServer_RequestHandler.__controllers[c].retrieve_temperatures(),
                           file=sys.stderr, flush=True)
             
         # Send response status code
@@ -141,8 +141,8 @@ class DS18B20_on_Arduino_HTTPServer_RequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
         result={}
-        for c in DS18B20_on_Arduino_HTTPServer_RequestHandler.__controllers.keys():
-            result.update(DS18B20_on_Arduino_HTTPServer_RequestHandler.__controllers[c].retrieve_temperatures())
+        for c in DS18B20_via_Arduino_HTTPServer_RequestHandler.__controllers.keys():
+            result.update(DS18B20_via_Arduino_HTTPServer_RequestHandler.__controllers[c].retrieve_temperatures())
         if DEBUG:
             print(f'results are: {result}',
                   file=sys.stderr, flush=True)
@@ -160,7 +160,7 @@ class DS18B20_on_Arduino_HTTPServer_RequestHandler(BaseHTTPRequestHandler):
     
  
 def run():
-    httpd_server = HTTPServer(DEFAULT_SERVER_ADDRESS, DS18B20_on_Arduino_HTTPServer_RequestHandler)
+    httpd_server = HTTPServer(DEFAULT_SERVER_ADDRESS, DS18B20_via_Arduino_HTTPServer_RequestHandler)
     print('running server listening on {}...'.format(DEFAULT_SERVER_ADDRESS))
     httpd_server.serve_forever()
     

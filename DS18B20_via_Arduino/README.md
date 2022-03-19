@@ -102,42 +102,53 @@ where:
   \n is the <new-line> character
 An empty line is sent after the data for each sensor is sent.
 
-####DS18B20.ino:
+## DS18B20.ino:
 This is the most basic program.  It periodically (once every 60 seconds) looks for devices on the digital pins, for 
 any DS18B20 devices found samples the temperature and returns the data.  More than one device can be attached to 
 each pin.  If many devices are attached, or if there are many retries, the code might not be able to keep up with 
 the 60 second period.  If this happens the code will sample as often as possible.
 
-####DS18B20-Mock.ino:
+## DS18B20-Mock.ino:
 This is very basic program that obeys the normal protocol for use with testing and developing with real sensors are 
 not available.
 
-####DS18B20-SampleOnDemand.ino:
+## DS18B20-SampleOnDemand.ino:
 This is the most basic program for the on-demand protocol.  When the controller sends a <new-line> character the code
 looks for devices on the digital pins, and for any DS18B20 devices found samples the temperature and returns the data.
 More than one device can be attached to each pin.  The controller should not send a <new-line> character till the data
 from the previous request is complete.  (i.e. an empty line is received)
 
-####DS18B20-SampleOnDemand-Mock.ino:
+## DS18B20-SampleOnDemand-Mock.ino:
 This is very basic program that obeys the on-demand protocol for use with testing and developing with real sensors 
 are not available.
 
-####DS18B20-Fast-SampleOnDemand.ino:
+## DS18B20-Fast-SampleOnDemand.ino:
 This uses the same communication protocol but the Arduino program samples the sensors in parallel rather than serially
 so the data can be returned faster.  
 NOTE:  At this time the code only supports a single sensor per digital pin rather than multiple DS18B20 devices per pin
 as for the DS18B20.ino and DS18B20-SampleOnDemand.ino programs.
 
-####DS18B20-Fast-SampleOnDemand-Mock.ino:
+## DS18B20-Fast-SampleOnDemand-Mock.ino:
 This is very basic program that obeys the on-demand protocol for use with testing and developing with real sensors 
 are not available.
 
 
-#Python Programs
-####SampleOnDemandSensors.py
-This periodically (defaults to every 10 minutes) samples the sensors and 
-saves the values in /opt/Sensors/logs
+# Python Programs
 
+##DS18B20_OnDemand_via_Arduino_Controller.py
+This provides class which will interact with an Arduino attached via a serial
+port to collect temperature measurements from DS18B20 sensors.
+
+##SampleOnDemandSensors.py
+This uses the DS18B20_OnDemand_via_Arduino_Controller class to 
+periodically samples the sensors and saves the values in /opt/Sensors/logs.
+You can change the interval and log file with command parameters.
+
+##DS18B20_via_Arduino_WebServer.py
+This uses the DS18B20_OnDemand_via_Arduino_Controller class to 
+provide sensor measurements as JSON via an HTTP server.
+The defaults respond to requests on port 18820 from any address.
+You can change the port or request sources with command parameters. 
 
 #Installation and Setup
 ### Configure the software (15 minutes -- longer if system is not up-to-date)
@@ -164,8 +175,8 @@ standard directory for "optional" software.  To install the software use
 This will place a copy of the software in `/opt` and leave behind
 information that makes it easy to retrieve updates later if needed.
 
-Next 
-
+Next
+ 
     cd /opt/Sensors/DS18B20-via-Arduino
     
 and make sure there are a number of python programs and other scripts present.

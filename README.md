@@ -18,10 +18,10 @@ The various sensors attach to the Raspberry Pi in a variety of ways including:
     I2C pins (i.e. data / clock are board pins 3 / 5)
       BMP280  (also needs +3.3 & Ground)
       BME280  (also needs +3.3 & Ground)
-    W1 pin (i.e. board pin 7)
+    W1 pin (board pin 7, can use different pin with /boot/config.txt parameter)
       DS18B20  (also needs +3.3 & Ground)
     USB ports
-      DS18B20_on_Arduino  (also needs an Arduino with attached DS18B20 devices)
+      DS18B20_via_Arduino  (also needs an Arduino with attached DS18B20 devices)
     Other GPIO pins (you pick, stay away from above and some special purpose pins)
       HTU21D  (also needs +3.3 & Ground, defaults: data/clock on board pins 11/13)
       Si702x  (also needs +3.3 & Ground, defaults: data/clock on board pins 11/13)

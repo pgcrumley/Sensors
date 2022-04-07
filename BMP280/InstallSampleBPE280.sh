@@ -1,7 +1,7 @@
 #!/bin/bash
 # MIT License
 #
-# Copyright (c) 2019, 2021 Paul G Crumley
+# Copyright (c) 2019, 2022 Paul G Crumley
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,10 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+# make sure we have devices in /dev
+modprobe i2c_dev
+
+# create location of output if it does not already exist
 mkdir /opt/Sensors/logs
 
 cp /opt/Sensors/BMP280/SampleBMP280.service /lib/systemd/system
